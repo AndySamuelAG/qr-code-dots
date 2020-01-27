@@ -18,13 +18,13 @@ use Endroid\QrCode\Exception\ValidationException;
 use Endroid\QrCode\LabelAlignment;
 use Endroid\QrCode\QrCodeInterface;
 use Zxing\QrReader;
+use Endroid\QrCode\Writer\AbstractWriter;
 
 class PngWriter extends AbstractWriter
 {
     public function writeString(QrCodeInterface $qrCode): string
     {
         $image = $this->createImage($qrCode->getData(), $qrCode);
-
         $logoPath = $qrCode->getLogoPath();
         if (null !== $logoPath) {
             $image = $this->addLogo($image, $logoPath, $qrCode->getLogoWidth(), $qrCode->getLogoHeight());
@@ -44,10 +44,8 @@ class PngWriter extends AbstractWriter
                      Adjust your parameters to increase readability or disable built-in validation.');
             }
         }
-
         return $string;
     }
-
     /** @return resource */
     private function createImage(array $data, QrCodeInterface $qrCode)
     {
@@ -62,23 +60,47 @@ class PngWriter extends AbstractWriter
     /** @return resource */
     private function createBaseImage(int $baseSize, array $data, QrCodeInterface $qrCode)
     {
-        $image = imagecreatetruecolor($data['block_count'] * $baseSize, $data['block_count'] * $baseSize);
+        $size = $data['block_count']+1;
+        $dot = 25;
 
+        $image = imagecreatetruecolor($size * $baseSize, $size * $baseSize);
         if (!is_resource($image)) {
             throw new GenerateImageException('Unable to generate image: check your GD installation');
         }
 
-        $foregroundColor = imagecolorallocatealpha($image, $qrCode->getForegroundColor()['r'], $qrCode->getForegroundColor()['g'], $qrCode->getForegroundColor()['b'], $qrCode->getForegroundColor()['a']);
+        $qrColorFirst = "a32a7a";
+        $qrColorLast = "8125B5";
+        $leftR = hexdec(substr($qrColorFirst,0,2));
+        $leftG = hexdec(substr($qrColorFirst,2,2));
+        $leftB = hexdec(substr($qrColorFirst,4,2));
+        $rightR = hexdec(substr($qrColorLast,0,2));
+        $rightG = hexdec(substr($qrColorLast,2,2));
+        $rightB = hexdec(substr($qrColorLast,4,2));
+
+        for($i=0;$i<250;$i++) {
+            $colorset[$i] = imagecolorallocate($image, intval($leftR + ($i*(($rightR-$leftR)/250))), intval($leftG + ($i*(($rightG-$leftG)/250))), intval($leftB + ($i*(($rightB-$leftB)/250))));
+        }
+
+//        $foregroundColor = imagecolorallocatealpha($image, $qrCode->getForegroundColor()['r'], $qrCode->getForegroundColor()['g'], $qrCode->getForegroundColor()['b'], $qrCode->getForegroundColor()['a']);
         $backgroundColor = imagecolorallocatealpha($image, $qrCode->getBackgroundColor()['r'], $qrCode->getBackgroundColor()['g'], $qrCode->getBackgroundColor()['b'], $qrCode->getBackgroundColor()['a']);
         imagefill($image, 0, 0, $backgroundColor);
 
         foreach ($data['matrix'] as $row => $values) {
             foreach ($values as $column => $value) {
                 if (1 === $value) {
-                    imagefilledrectangle($image, $column * $baseSize, $row * $baseSize, intval(($column + 1) * $baseSize), intval(($row + 1) * $baseSize), $foregroundColor);
+                    imagefilledellipse($image, intval(($column + 1)) * $dot, intval($row + 1) * $dot, $dot, $dot, $colorset[$column/($size/250)]);
                 }
             }
         }
+
+
+//        foreach ($data['matrix'] as $row => $values) {
+//            foreach ($values as $column => $value) {
+//                if (1 === $value) {
+//                    imagefilledrectangle($image, $column * $baseSize, $row * $baseSize, intval(($column + 1) * $baseSize), intval(($row + 1) * $baseSize), $foregroundColor);
+//                }
+//            }
+//        }
 
         return $image;
     }
