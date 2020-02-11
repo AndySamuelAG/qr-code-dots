@@ -122,7 +122,7 @@ class PngWriter extends AbstractWriter
         imagefill($image, 0, 0, $backgroundColor);
         imagecopyresampled($image, $baseImage, (int) $data['margin_left'], (int) $data['margin_left'], 0, 0, (int) $data['inner_width'], (int) $data['inner_height'], imagesx($baseImage), imagesy($baseImage));
         imagesavealpha($image, true);
-        $this->addLogo($image, 'assets/img/fede-qr-logo.png');
+        $this->addLogo($image, 'assets/img/fede-logo.png');
         return $image;
     }
 
