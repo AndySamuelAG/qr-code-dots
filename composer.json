@@ -1,14 +1,14 @@
 {
-    "name": "endroid/qr-code",
-    "description": "Endroid QR Code",
-    "keywords": ["endroid", "qrcode", "qr", "code", "bundle", "php"],
-    "homepage": "https://github.com/endroid/qr-code",
+    "name": "andysamuelag/qr-code-dots",
+    "description": "QR Code Dots",
+    "keywords": ["andysamuelag", "qrcode", "qr", "code", "dots", "php"],
+    "homepage": "https://github.com/AndySamuelAG/qr-code-dots",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "Jeroen van den Enden",
-            "email": "info@endroid.nl"
+            "name": "Andy Samuel Alvarado",
+            "email": "andyalvarado1997@gmail.com"
         }
     ],
     "require": {
